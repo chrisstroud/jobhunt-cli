@@ -341,7 +341,7 @@ declarations without workspace source or special compiler flags. It does not pro
 the CLI is downloadable from the public registry. After publication, install the prerelease with:
 
 ```sh
-npm install --global jobhunt@0.1.1
+npm install --global jobhunt@0.1.2
 jobhunt --version
 jobhunt --help
 ```

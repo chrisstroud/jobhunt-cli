@@ -1,6 +1,6 @@
 {
   "name": "jobhunt",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The JobHunt command line: sign in, read your job search, save postings.",
   "keywords": [
     "jobhunt",
@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/chrisstroud/jobhunt-cli/issues"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "jobhunt": "dist/jobhunt.js"

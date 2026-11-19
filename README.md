@@ -64,6 +64,10 @@ something says so and asks for the exact name before it does.
 sends requests only to `https://jobhunt.app` (or the `--origin` you give it), never follows a
 redirect with your connection, and writes no logs.
 
+## Licence
+
+MIT, Copyright (c) 2026 JobHunt App, Inc. See [LICENSE](LICENSE).
+
 ## Source and verification
 
 This repository is the source of the `jobhunt` package on npm: `cli/` is the command line, `client/` the

@@ -63,3 +63,7 @@ something says so and asks for the exact name before it does.
 `jobhunt overview` includes your name and the jobs you track. Treat its output as private. The CLI
 sends requests only to `https://jobhunt.app` (or the `--origin` you give it), never follows a
 redirect with your connection, and writes no logs.
+
+## Licence
+
+MIT. See `LICENSE` in the package.
