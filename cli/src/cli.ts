@@ -19,6 +19,7 @@ import { DEFAULT_ORIGIN, JobHuntClient, JobHuntError, validToken } from '../../c
 import type { CreateApplication, UpdateApplication, CreateContact, UpdateContact, Credential } from '../../client/src/index.ts';
 import { CredentialStore, configDirectory } from './credentials.ts';
 import { login, openBrowser, refresh, revoke } from './oauth.ts';
+import { runBridge, sharedToken } from './mcp-bridge.ts';
 import { taskCommand } from './tasks.ts';
 import { taskPreferencesInput } from '../../client/src/task-preferences-contracts.ts';
 import { stageTemplateCommand } from './stage-templates.ts';
@@ -253,6 +254,7 @@ const help = `jobhunt — JobHunt command line client
   notifications mark-read --file JSON
                                   Explicit read/read_all action; no messages sent
   whoami                          Read your account identity
+  mcp                             Run a local MCP server on stdin/stdout for apps that cannot sign in themselves
   account connected               Read the account ID for bound mutation intents
   hunt-page get [--page N]         Read retained settings and source/profile choices
   publications get SOURCE_ID --kind document|application [--account-id ACCOUNT_ID]
@@ -638,7 +640,7 @@ const commandOptions: Record<string, string[]> = {
   ...huntPageOptions,
   ...exportOptions,
   ...crmOptions, ...huntOptions, ...huntSettingsOptions, ...pipelineOptions, ...screeningInterviewOptions, ...libraryOptions,
-  'auth login': ['no-browser', 'scopes'], 'auth logout': ['local-only'], 'auth status': [], whoami: [], 'account connected': [],
+  mcp: [], 'auth login': ['no-browser', 'scopes'], 'auth logout': ['local-only'], 'auth status': [], whoami: [], 'account connected': [],
   'applications list': ['page', 'page-size', 'search', 'status'], 'applications get': [],
   'applications create': ['title', 'company', 'url', 'source', 'hunt', 'file'],
   'applications update': ['title', 'company', 'url', 'source', 'revision'], 'applications delete': ['confirm'],
@@ -705,7 +707,7 @@ export async function runCLI(args: string[], io: IO, version: string): Promise<n
     if (new Set(names).size !== names.length) throw new JobHuntError('usage_error');
     if (values.help || args.length === 0) { io.stdout.write(help); return 0; }
     if (values.version) { io.stdout.write(json ? JSON.stringify({ version }) + '\n' : version + '\n'); return 0; }
-    const oneWord = positionals[0] === 'whoami' || (positionals.length === 1 && pluginOneWord.has(positionals[0]));
+    const oneWord = positionals[0] === 'whoami' || positionals[0] === 'mcp' || (positionals.length === 1 && pluginOneWord.has(positionals[0]));
     const command = oneWord ? positionals[0] : positionals.slice(0, 2).join(' ');
     if (!(command in commandOptions) || names.some(name => !globalOptions.includes(name) && !commandOptions[command].includes(name))) throw new JobHuntError('usage_error');
     const needsTarget = ['jobs save', 'applications get', 'applications update', 'applications delete', 'contacts get', 'contacts update', 'contacts delete',
@@ -873,6 +875,23 @@ export async function runCLI(args: string[], io: IO, version: string): Promise<n
         if (values.confirm !== positionals[2]) throw new JobHuntError('confirmation_required');
         await client.deleteContact(positionals[2]); output({ deleted: true, id: positionals[2] });
       }
+    }
+    if (command === 'mcp') {
+      if (external) throw new JobHuntError('usage_error');
+      // The saved sign-in is read under the store lock only when needed (not held across the connection), so other
+      // commands can refresh it too; concurrent messages share one read.
+      const token = sharedToken(() => store.locked(async () => {
+        let session = await store.load();
+        if (!session) throw new JobHuntError('authentication_required');
+        if (session.expiresAt <= Date.now() + 30000) {
+          session = await refresh(publicClient, session);
+          try { await store.save(session); }
+          catch (error) { await revoke(publicClient, session).catch(() => {}); throw error; }
+        }
+        return { token: session.accessToken, expiresAt: session.expiresAt };
+      }));
+      await runBridge({ origin, input: io.stdin, output: io.stdout, log: io.stderr, token, fetchImpl: io.fetchImpl, timeoutMs: number(values.timeout, 60000) });
+      return 0;
     }
     if (external) await execute(external);
     else await store.locked(async () => {
