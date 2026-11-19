@@ -1,0 +1,19 @@
+{
+  "authenticated": true,
+  "origin": "https://jobhunt.app",
+  "profile": "default",
+  "account_id": "00000000-0000-4000-8000-000000000001",
+  "scopes": [
+    "read:profile",
+    "read:applications",
+    "write:applications",
+    "read:campaigns",
+    "read:companies",
+    "read:contacts",
+    "read:documents",
+    "read:interviews",
+    "read:tasks",
+    "read:analytics"
+  ],
+  "storage": "keyring"
+}

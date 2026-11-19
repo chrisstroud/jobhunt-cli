@@ -1,0 +1,38 @@
+{
+  "name": "jobhunt",
+  "version": "0.1.1",
+  "description": "The JobHunt command line: sign in, read your job search, save postings.",
+  "keywords": [
+    "jobhunt",
+    "job-search",
+    "cli",
+    "career"
+  ],
+  "homepage": "https://jobhunt.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisstroud/jobhunt-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisstroud/jobhunt-cli/issues"
+  },
+  "license": "UNLICENSED",
+  "type": "module",
+  "bin": {
+    "jobhunt": "dist/jobhunt.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "optionalDependencies": {
+    "@napi-rs/keyring": "2.1.1"
+  }
+}

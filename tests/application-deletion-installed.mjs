@@ -1,0 +1,4 @@
+/** Real installed SDK consumer; credentials arrive only through private stdin. */
+import assert from 'node:assert/strict';import{pathToFileURL}from'node:url';
+let source='';for await(const chunk of process.stdin)source+=chunk;const input=JSON.parse(source),{JobHuntClient}=await import(pathToFileURL(input.installedSDK).href);
+try{const client=new JobHuntClient({origin:input.origin,allowLoopback:true,credential:{origin:input.origin,token:input.token}});assert.equal((await client.removeApplication(input.original.original)).data.deleted,true);const proof=await client.applicationDeletions.check(input.original);assert.equal(proof.application_id,input.original.original.application_id);assert.equal((await client.applicationDeletions.close(input.original,true)).outcome,'recorded');process.stdout.write(JSON.stringify({verified:true,proof}));}catch{process.stderr.write('Synthetic installed original failed');process.exitCode=1;}
