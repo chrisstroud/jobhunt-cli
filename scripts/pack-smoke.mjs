@@ -24,7 +24,7 @@ const first = pack();
 // The published name lives only in cli/package.json; changing it there is the whole rename.
 assert.equal(first.name, cliManifest.name);
 assert.equal(first.version, cliManifest.version);
-assert.deepEqual(first.files.map(file => file.path).sort(), ['README.md', 'dist/jobhunt.js', 'package.json']);
+assert.deepEqual(first.files.map(file => file.path).sort(), ['LICENSE', 'README.md', 'dist/jobhunt.js', 'package.json']);
 assert.ok(first.size < 256 * 1024);
 const artifact = path.join(temporary, first.filename);
 const clientPackage = JSON.parse(runNpm(['pack', '--json', '--ignore-scripts', '--pack-destination', temporary], path.join(root, 'client')))[0];
