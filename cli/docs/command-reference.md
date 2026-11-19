@@ -709,6 +709,20 @@ jobhunt whoami --json
 jobhunt auth logout
 ```
 
+### Local MCP bridge
+
+`jobhunt mcp` runs a local MCP server on standard input and output for apps that
+cannot sign in to `https://jobhunt.app/mcp` themselves (LM Studio, Jan). Run
+`jobhunt auth login` once. The bridge forwards each message to `/mcp` with the saved
+sign-in, refreshing it as needed; the token stays in the credential store and never
+appears in the app's config. It grants the same scopes as the saved sign-in. If the
+sign-in is revoked, requests fail with a message to run `jobhunt auth login` again.
+It does not follow redirects or print the token.
+
+```json
+{ "mcpServers": { "jobhunt": { "command": "npx", "args": ["-y", "jobhunt", "mcp"] } } }
+```
+
 Login opens JobHunt's existing browser consent flow. The public client uses
 S256 PKCE, random state and an ephemeral IPv4 loopback callback; no client secret
 or password is requested. `--no-browser` prints the authorization URL and waits
