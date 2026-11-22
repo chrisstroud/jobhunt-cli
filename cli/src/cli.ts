@@ -66,8 +66,8 @@ export type IO = {
 const help = `jobhunt — JobHunt command line client
 
   auth login [--no-browser]        Authorize in your browser using PKCE
-    [--scopes read:profile,read:contacts,write:contacts]
-                                  Replace default permissions with an explicit list
+    [--scopes read:profile,read:contacts,write:contacts | --preset read-only|standard|full]
+                                  Replace the default permissions with an explicit list, or pick a preset (default: standard)
   auth status                     Check the current credential with the API
   status                          {"signed_in": true|false}, nothing else (for plugins and status bars)
   overview                        Where the search stands: the result of the get_overview tool
@@ -640,7 +640,7 @@ const commandOptions: Record<string, string[]> = {
   ...huntPageOptions,
   ...exportOptions,
   ...crmOptions, ...huntOptions, ...huntSettingsOptions, ...pipelineOptions, ...screeningInterviewOptions, ...libraryOptions,
-  mcp: [], 'auth login': ['no-browser', 'scopes'], 'auth logout': ['local-only'], 'auth status': [], whoami: [], 'account connected': [],
+  mcp: [], 'auth login': ['no-browser', 'scopes', 'preset'], 'auth logout': ['local-only'], 'auth status': [], whoami: [], 'account connected': [],
   'applications list': ['page', 'page-size', 'search', 'status'], 'applications get': [],
   'applications create': ['title', 'company', 'url', 'source', 'hunt', 'file'],
   'applications update': ['title', 'company', 'url', 'source', 'revision'], 'applications delete': ['confirm'],
@@ -749,7 +749,7 @@ export async function runCLI(args: string[], io: IO, version: string): Promise<n
     }
     const store = io.storeFactory?.(origin, profile) ?? new CredentialStore(origin, profile, { directory: configDirectory(io.env) });
     if (command === 'auth login') {
-      const session = await login(publicClient, profile, { scopes: values.scopes as string | undefined, timeoutMs: io.loginTimeoutMs, onAuthorization: async url => {
+      const session = await login(publicClient, profile, { scopes: values.scopes as string | undefined, preset: values.preset as string | undefined, timeoutMs: io.loginTimeoutMs, onAuthorization: async url => {
         io.stderr.write(`Authorize JobHunt in your browser:\n${url}\n`);
         if (!values['no-browser']) await (io.browser ?? openBrowser)(url).catch(() => io.stderr.write('Open the URL above to continue.\n'));
       } });

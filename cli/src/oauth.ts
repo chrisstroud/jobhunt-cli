@@ -8,11 +8,19 @@ import type { Session } from './credentials.ts';
 
 export const DEFAULT_SCOPES = ['read:profile', 'read:applications', 'write:applications'];
 /**
- * What `jobhunt auth login` asks for with no flags: the standard set for first-party integrations on this computer
- * (docs/plugin-contract.md). One write permission, saving a link. `--scopes` replaces it.
+ * What `jobhunt auth login` asks for with no flags: the standard set for an AI or integration on this computer. It reads what the
+ * tools read and writes what the guides promise: applications, tasks, contacts, interviews, documents and highlights. Publishing
+ * the Hunt Page, profile edits, Hunts and companies, and account-level permissions stay opt-in (`--preset full`, `--scopes`).
+ * `--preset read-only` asks for no write permission at all. docs/plugin-contract.md.
  */
 export const INTEGRATION_SCOPES = ['read:profile', 'read:applications', 'write:applications', 'read:campaigns', 'read:companies',
-  'read:contacts', 'read:documents', 'read:interviews', 'read:tasks', 'read:analytics'];
+  'read:contacts', 'read:documents', 'read:interviews', 'read:tasks', 'read:analytics',
+  'write:tasks', 'write:contacts', 'write:interviews', 'write:documents', 'write:highlights', 'read:highlights', 'read:activity'];
+/** Reads only: the standard set without any write permission. */
+export const READ_ONLY_SCOPES = INTEGRATION_SCOPES.filter(scope => scope.startsWith('read:'));
+/** The standard set plus the writes that change what the person publishes or how their search is organised. */
+export const FULL_SCOPES = [...INTEGRATION_SCOPES, 'write:profile', 'write:campaigns', 'write:companies'];
+export const LOGIN_PRESETS: Record<string, string[]> = { standard: INTEGRATION_SCOPES, 'read-only': READ_ONLY_SCOPES, full: FULL_SCOPES };
 export const LOGIN_SCOPES = [...DEFAULT_SCOPES, 'read:contacts', 'write:contacts', 'read:tasks', 'write:tasks', 'read:campaigns',
   'read:calendar', 'write:calendar', 'read:developer', 'write:developer',
   'read:extensions', 'write:extensions',
@@ -22,7 +30,11 @@ export const LOGIN_SCOPES = [...DEFAULT_SCOPES, 'read:contacts', 'write:contacts
 /** Explicit replacement, never an implicit expansion of existing grants. */
 /** How long `auth login` waits for the person to approve in the browser. */
 export const LOGIN_TIMEOUT_MS = 300_000;
-export function loginScopes(value?: string): string[] {
+export function loginScopes(value?: string, preset?: string): string[] {
+  if (preset !== undefined) {
+    if (value !== undefined || !Object.hasOwn(LOGIN_PRESETS, preset)) throw new JobHuntError('invalid_input');
+    return [...LOGIN_PRESETS[preset]!];
+  }
   if (value === undefined) return [...INTEGRATION_SCOPES];
   const scopes = value.split(',');
   if (!scopes.includes('read:profile') || scopes.some(scope => !LOGIN_SCOPES.includes(scope)) ||
@@ -87,9 +99,9 @@ export async function openBrowser(url: string): Promise<void> {
 
 /** Public client, S256 PKCE, exact loopback callback, bounded one-use state. */
 export async function login(client: JobHuntClient, profile: string, options: {
-  onAuthorization: (url: string) => Promise<void>; timeoutMs?: number; scopes?: string;
+  onAuthorization: (url: string) => Promise<void>; timeoutMs?: number; scopes?: string; preset?: string;
 }): Promise<Session> {
-  const scopes = loginScopes(options.scopes);
+  const scopes = loginScopes(options.scopes, options.preset);
   const verifier = randomBytes(48).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const state = randomBytes(32).toString('base64url');

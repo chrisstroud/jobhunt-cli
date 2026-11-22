@@ -29,10 +29,11 @@ are made-up data in the real shapes; the same files are in `plugin-fixtures/` fo
 jobhunt auth login
 ```
 
-That is the whole integration. It asks for the standard integration permissions (the ten below, one
-write: saving a link), opens the person's default browser on JobHunt's approval screen, and waits. The
-person approves in the browser; the command saves the connection and exits `0`. `--scopes a,b,c`
-replaces the set; nothing else is needed.
+That is the whole integration. It asks for the standard permissions (the seventeen below: reads, plus the
+writes an AI needs to keep the search up to date), opens the person's default browser on JobHunt's approval
+screen, and waits. The person approves in the browser; the command saves the connection and exits `0`.
+`--preset read-only` asks for no write permission at all, `--preset full` adds the writes that publish or
+reorganise (profile, Hunts, companies), and `--scopes a,b,c` replaces the set; nothing else is needed.
 
 - **Safe from a GUI process.** It never prompts, never reads stdin and does not need a terminal. The
   browser is opened with the platform's own opener (`xdg-open`, `open`, `rundll32`), detached, so a
@@ -63,7 +64,11 @@ replaces the set; nothing else is needed.
   removes it and revokes it at JobHunt. The person can also end it in JobHunt's Connect Agent panel.
 - Use `status` first: sign in only when it says `{"signed_in": false}`.
 
-The ten permissions: `read:profile, read:applications, write:applications, read:campaigns, read:companies, read:contacts, read:documents, read:interviews, read:tasks, read:analytics`.
+The standard permissions (a bare login): `read:profile, read:applications, write:applications, read:campaigns, read:companies, read:contacts, read:documents, read:interviews, read:tasks, read:analytics, write:tasks, write:contacts, write:interviews, write:documents, write:highlights, read:highlights, read:activity`.
+
+The plugin commands (`status`, `overview`, `activity`, `jobs save`) need only the first ten, with one write permission: saving a link. The seven after them are what the AI tools use to save tasks, contacts, interview rounds, documents and highlights.
+
+Opt-in, never in a bare login: `write:profile`, `write:campaigns` and `write:companies` (`--preset full`), and the account-level permissions (calendar, developer, extensions, notifications, account export), which need `--scopes`.
 
 <!-- fixture: login-success.json -->
 ```json
@@ -82,7 +87,14 @@ The ten permissions: `read:profile, read:applications, write:applications, read:
     "read:documents",
     "read:interviews",
     "read:tasks",
-    "read:analytics"
+    "read:analytics",
+    "write:tasks",
+    "write:contacts",
+    "write:interviews",
+    "write:documents",
+    "write:highlights",
+    "read:highlights",
+    "read:activity"
   ],
   "storage": "keyring"
 }
