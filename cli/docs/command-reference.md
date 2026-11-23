@@ -727,11 +727,13 @@ Login opens JobHunt's existing browser consent flow. The public client uses
 S256 PKCE, random state and an ephemeral IPv4 loopback callback; no client secret
 or password is requested. `--no-browser` prints the authorization URL and waits
 for you to open it. The URL contains a short-lived authorization challenge; do
-not paste it into tickets or shared logs. Login requests `read:profile`,
-`read:applications` and `write:applications`. Browser cookies are used only by
+not paste it into tickets or shared logs. A bare login requests the standard permissions: reads, plus saving applications, tasks, contacts,
+interview rounds, documents and highlights (`--preset standard`, the default). `--preset read-only` asks for
+no write permission; `--preset full` also asks to edit the profile and publish the Hunt Page, and to change
+Hunts and companies. Browser cookies are used only by
 the browser during consent, never by application commands.
 
-Use `--scopes` to replace those defaults with explicit permissions. For contact-only
+Use `--scopes` to replace the preset with explicit permissions (a preset and `--scopes` never combine). For contact-only
 access, use a separate profile:
 
 ```sh

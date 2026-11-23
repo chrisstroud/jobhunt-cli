@@ -13,7 +13,14 @@
     "read:documents",
     "read:interviews",
     "read:tasks",
-    "read:analytics"
+    "read:analytics",
+    "write:tasks",
+    "write:contacts",
+    "write:interviews",
+    "write:documents",
+    "write:highlights",
+    "read:highlights",
+    "read:activity"
   ],
   "storage": "keyring"
 }

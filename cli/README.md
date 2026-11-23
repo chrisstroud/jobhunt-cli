@@ -23,7 +23,7 @@ Your browser opens JobHunt's approval screen and lists what the command line may
 the command finishes; there is nothing to copy or type. It waits five minutes for you. No password is
 typed into the terminal. The connection is kept in your operating system's credential store
 (Keychain, Credential Manager or Secret Service); where there is none, in a file only you can read.
-Sign out, and revoke the connection, with `jobhunt auth logout`. `--scopes` replaces the permissions it
+Sign out, and revoke the connection, with `jobhunt auth logout`. `--preset read-only|standard|full` picks a preset (the default is standard, which can save tasks, contacts, interview rounds, documents and highlights as well as applications), and `--scopes` replaces the permissions it
 asks for.
 
 ## Everyday commands

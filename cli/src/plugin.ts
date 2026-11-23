@@ -3,10 +3,11 @@
  * every few minutes. The contract is packages/cli/docs/plugin-contract.md; tests/plugin.test.ts pins it.
  */
 import { JobHuntClient, JobHuntError, type JsonObject } from '../../client/src/index.ts';
-import { INTEGRATION_SCOPES } from './oauth.ts';
 
-/** What `jobhunt auth login` grants with no flags, and every command below needs (get_overview, save_job and the activity counts). */
-export const PLUGIN_SCOPES = INTEGRATION_SCOPES;
+/** What every command below needs (get_overview, save_job and the activity counts): one write permission, saving a link. A bare
+ * `jobhunt auth login` asks for the standard set, which includes all of these. */
+export const PLUGIN_SCOPES = ['read:profile', 'read:applications', 'write:applications', 'read:campaigns', 'read:companies',
+  'read:contacts', 'read:documents', 'read:interviews', 'read:tasks', 'read:analytics'];
 export const pluginOptions: Record<string, string[]> = {
   status: [], overview: [], activity: ['days', 'time-zone'], 'jobs save': [],
 };
